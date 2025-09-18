@@ -54,6 +54,11 @@ file:
   upload-dir: ./uploads
   allowed-types: jpg,jpeg,png,gif,pdf,doc,docx,xls,xlsx
 
+# JWT配置
+jwt:
+  secret: mySecretKey1234567890123456789012345678901234567890
+  expiration: 86400000  # 24小时 (毫秒)
+
 # 日志配置
 logging:
   level:

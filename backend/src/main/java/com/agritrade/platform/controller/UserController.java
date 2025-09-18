@@ -11,8 +11,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -24,14 +22,18 @@ import org.springframework.web.bind.annotation.*;
  * 
  * @author MikeCOjike
  */
-@Slf4j
 @Tag(name = "用户管理", description = "用户注册、登录、管理等功能")
 @RestController
 @RequestMapping("/users")
-@RequiredArgsConstructor
 public class UserController {
     
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(UserController.class);
+    
     private final UserService userService;
+    
+    public UserController(UserService userService) {
+        this.userService = userService;
+    }
     
     @Operation(summary = "用户注册", description = "新用户注册接口")
     @PostMapping("/register")

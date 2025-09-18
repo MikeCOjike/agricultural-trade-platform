@@ -7,8 +7,6 @@ import com.agritrade.platform.dto.response.UserResponse;
 import com.agritrade.platform.entity.User;
 import com.agritrade.platform.repository.UserRepository;
 import com.agritrade.platform.util.JwtUtil;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -23,14 +21,20 @@ import java.util.Optional;
  * 
  * @author MikeCOjike
  */
-@Slf4j
 @Service
-@RequiredArgsConstructor
 public class UserService {
+    
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(UserService.class);
     
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
+    
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, JwtUtil jwtUtil) {
+        this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.jwtUtil = jwtUtil;
+    }
     
     /**
      * 用户注册
