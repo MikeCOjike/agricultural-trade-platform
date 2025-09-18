@@ -1,5 +1,4 @@
 package com.agritrade.platform.controller;
-
 import com.agritrade.platform.common.Result;
 import com.agritrade.platform.dto.request.UserLoginRequest;
 import com.agritrade.platform.dto.request.UserRegisterRequest;
@@ -118,7 +117,7 @@ public class UserController {
             @Parameter(description = "用户状态") @RequestParam User.UserStatus status) {
         try {
             userService.updateUserStatus(id, status);
-            return Result.success("状态更新成功");
+            return Result.success("状态更新成功", null);
         } catch (Exception e) {
             log.error("更新用户状态失败: {}", e.getMessage());
             return Result.error(e.getMessage());
@@ -130,7 +129,7 @@ public class UserController {
     public Result<Void> deleteUser(@PathVariable Long id) {
         try {
             userService.deleteUser(id);
-            return Result.success("删除成功");
+            return Result.success("删除成功", null);
         } catch (Exception e) {
             log.error("删除用户失败: {}", e.getMessage());
             return Result.error(e.getMessage());
