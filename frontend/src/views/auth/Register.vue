@@ -23,11 +23,22 @@
           />
         </el-form-item>
         
+        <el-form-item prop="realName">
+          <el-input
+            v-model="form.realName"
+            placeholder="请输入真实姓名"
+            prefix-icon="User"
+          />
+        </el-form-item>
+        
         <el-form-item prop="userType">
           <el-select v-model="form.userType" placeholder="请选择用户类型" style="width: 100%">
-            <el-option label="出口企业" value="EXPORT_ENTERPRISE" />
-            <el-option label="进口企业" value="IMPORT_ENTERPRISE" />
-            <el-option label="物流服务商" value="LOGISTICS_PROVIDER" />
+            <el-option 
+              v-for="option in userTypeOptions" 
+              :key="option.value"
+              :label="option.label" 
+              :value="option.value" 
+            />
           </el-select>
         </el-form-item>
         
@@ -68,18 +79,23 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive } from 'vue'
+import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, type FormInstance, type FormRules } from 'element-plus'
+import { register, getUserTypeOptions, type UserType } from '@/api/user'
+import { useUserStore } from '@/stores/user'
 
 const router = useRouter()
+const userStore = useUserStore()
 const loading = ref(false)
 const formRef = ref<FormInstance>()
+const userTypeOptions = getUserTypeOptions()
 
 const form = reactive({
   username: '',
   email: '',
-  userType: '',
+  realName: '',
+  userType: '' as UserType | '',
   password: '',
   confirmPassword: ''
 })
@@ -103,6 +119,9 @@ const rules: FormRules = {
     { required: true, message: '请输入邮箱', trigger: 'blur' },
     { type: 'email', message: '请输入正确的邮箱格式', trigger: 'blur' }
   ],
+  realName: [
+    { required: true, message: '请输入真实姓名', trigger: 'blur' }
+  ],
   userType: [
     { required: true, message: '请选择用户类型', trigger: 'change' }
   ],
@@ -118,19 +137,41 @@ const rules: FormRules = {
 const handleRegister = async () => {
   if (!formRef.value) return
   
-  await formRef.value.validate((valid) => {
+  await formRef.value.validate(async (valid) => {
     if (valid) {
       loading.value = true
       
-      // 模拟注册请求
-      setTimeout(() => {
+      try {
+        const response = await register({
+          username: form.username,
+          email: form.email,
+          realName: form.realName,
+          userType: form.userType as UserType,
+          password: form.password
+        })
+        
+        if (response.code === 200) {
+          ElMessage.success('注册成功！请登录')
+          router.push('/login')
+        } else {
+          ElMessage.error(response.message || '注册失败')
+        }
+      } catch (error: any) {
+        console.error('注册失败:', error)
+        ElMessage.error(error.message || '注册失败，请检查网络连接')
+      } finally {
         loading.value = false
-        ElMessage.success('注册成功！请登录')
-        router.push('/login')
-      }, 1000)
+      }
     }
   })
 }
+
+// 页面加载时检查是否已登录
+onMounted(() => {
+  if (userStore.isLoggedIn) {
+    router.push('/dashboard')
+  }
+})
 </script>
 
 <style lang="scss" scoped>

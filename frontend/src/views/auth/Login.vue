@@ -42,11 +42,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive } from 'vue'
+import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, type FormInstance, type FormRules } from 'element-plus'
+import { useUserStore } from '@/stores/user'
 
 const router = useRouter()
+const userStore = useUserStore()
 const loading = ref(false)
 const formRef = ref<FormInstance>()
 
@@ -69,19 +71,34 @@ const rules: FormRules = {
 const handleLogin = async () => {
   if (!formRef.value) return
   
-  await formRef.value.validate((valid) => {
+  await formRef.value.validate(async (valid) => {
     if (valid) {
       loading.value = true
       
-      // 模拟登录请求
-      setTimeout(() => {
+      try {
+        const success = await userStore.login({
+          username: form.username,
+          password: form.password
+        })
+        
+        if (success) {
+          router.push('/dashboard')
+        }
+      } catch (error) {
+        console.error('登录失败:', error)
+      } finally {
         loading.value = false
-        ElMessage.success('登录成功！')
-        router.push('/dashboard')
-      }, 1000)
+      }
     }
   })
 }
+
+// 页面加载时检查是否已登录
+onMounted(() => {
+  if (userStore.isLoggedIn) {
+    router.push('/dashboard')
+  }
+})
 </script>
 
 <style lang="scss" scoped>

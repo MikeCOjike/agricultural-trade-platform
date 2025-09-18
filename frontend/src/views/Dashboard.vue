@@ -10,7 +10,35 @@
           <el-button @click="appStore.toggleTheme()">
             <el-icon><Moon v-if="appStore.theme === 'light'" /><Sunny v-else /></el-icon>
           </el-button>
-          <el-button type="primary" @click="$router.push('/login')">登录</el-button>
+          
+          <div v-if="userStore.isLoggedIn" class="user-info">
+            <el-dropdown>
+              <span class="el-dropdown-link">
+                <el-avatar :size="32" :src="userStore.user?.avatarUrl">
+                  {{ userStore.userName.charAt(0) }}
+                </el-avatar>
+                <span class="username">{{ userStore.userName }}</span>
+                <el-icon class="el-icon--right"><arrow-down /></el-icon>
+              </span>
+              <template #dropdown>
+                <el-dropdown-menu>
+                  <el-dropdown-item @click="$router.push('/profile')">
+                    <el-icon><User /></el-icon>
+                    个人中心
+                  </el-dropdown-item>
+                  <el-dropdown-item divided @click="handleLogout">
+                    <el-icon><SwitchButton /></el-icon>
+                    退出登录
+                  </el-dropdown-item>
+                </el-dropdown-menu>
+              </template>
+            </el-dropdown>
+          </div>
+          
+          <div v-else class="login-buttons">
+            <el-button @click="$router.push('/login')">登录</el-button>
+            <el-button type="primary" @click="$router.push('/register')">注册</el-button>
+          </div>
         </div>
       </el-header>
       
@@ -87,12 +115,16 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { ElMessage } from 'element-plus'
+import { ElMessage, ElMessageBox } from 'element-plus'
+import { useRouter } from 'vue-router'
 import { useAppStore } from '@/stores/app'
+import { useUserStore } from '@/stores/user'
 import { healthCheck } from '@/api/test'
 import type { HealthResponse } from '@/api/test'
 
+const router = useRouter()
 const appStore = useAppStore()
+const userStore = useUserStore()
 const systemStatus = ref<HealthResponse | null>(null)
 
 const features = [
@@ -142,7 +174,25 @@ const testConnection = async () => {
   }
 }
 
+const handleLogout = async () => {
+  try {
+    await ElMessageBox.confirm('确定要退出登录吗？', '提示', {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning'
+    })
+    
+    userStore.logout()
+    router.push('/login')
+  } catch {
+    // 用户取消退出
+  }
+}
+
 onMounted(() => {
+  // 初始化用户store
+  userStore.initStore()
+  
   // 页面加载时自动测试连接
   testConnection()
 })
@@ -178,6 +228,32 @@ onMounted(() => {
     display: flex;
     align-items: center;
     gap: 12px;
+
+    .user-info {
+      .el-dropdown-link {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        cursor: pointer;
+        padding: 4px 8px;
+        border-radius: 6px;
+        transition: background-color 0.3s;
+
+        &:hover {
+          background-color: #f5f7fa;
+        }
+
+        .username {
+          font-size: 14px;
+          color: #333;
+        }
+      }
+    }
+
+    .login-buttons {
+      display: flex;
+      gap: 8px;
+    }
   }
 }
 
