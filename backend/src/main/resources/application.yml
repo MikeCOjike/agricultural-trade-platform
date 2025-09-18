@@ -1,0 +1,129 @@
+# ===================================
+# 农产品跨境贸易云平台 - Spring Boot配置
+# ===================================
+
+server:
+  port: 8080
+  servlet:
+    context-path: /api
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true
+
+spring:
+  application:
+    name: agricultural-trade-platform
+  
+  # 数据库配置
+  datasource:
+    url: jdbc:mysql://localhost:3306/agri_trade?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
+    username: root
+    password: 123456
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    
+  # JPA配置
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    database-platform: org.hibernate.dialect.MySQL8Dialect
+    properties:
+      hibernate:
+        format_sql: true
+        use_sql_comments: true
+        
+  # 文件上传配置
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 50MB
+      
+  # 国际化配置
+  messages:
+    basename: messages
+    encoding: UTF-8
+    
+# JWT配置
+jwt:
+  secret: agri-trade-secret-key-for-graduation-project-2024
+  expiration: 86400000 # 24小时
+
+# 文件存储配置
+file:
+  upload-dir: ./uploads
+  allowed-types: jpg,jpeg,png,gif,pdf,doc,docx,xls,xlsx
+
+# 日志配置
+logging:
+  level:
+    com.agritrade.platform: DEBUG
+    org.springframework.security: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+  file:
+    name: ./logs/application.log
+
+# SpringDoc OpenAPI配置
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    tags-sorter: alpha
+    operations-sorter: alpha
+  info:
+    title: 农产品跨境贸易云平台 API
+    description: 基于Spring Boot + Vue3的数字化贸易服务解决方案
+    version: 1.0.0
+    contact:
+      name: MikeCOjike
+      email: your.email@example.com
+
+# 管理端点配置
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: when-authorized
+
+---
+# 开发环境配置
+spring:
+  config:
+    activate:
+      on-profile: dev
+  datasource:
+    password: 123456
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+logging:
+  level:
+    root: INFO
+    com.agritrade.platform: DEBUG
+
+---
+# 生产环境配置
+spring:
+  config:
+    activate:
+      on-profile: prod
+  datasource:
+    password: ${DB_PASSWORD:your_production_password}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+
+logging:
+  level:
+    root: WARN
+    com.agritrade.platform: INFO
+
